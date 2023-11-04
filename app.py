@@ -29,13 +29,36 @@ def get_pdf_text(pdf_docs):
     return text
 
 
-def get_python_loader():
-    loader = GenericLoader.from_filesystem("codes",
-                                           glob="*/",
-                                           suffixes=[".py"],
-                                           parser=LanguageParser(language=Language.PYTHON, parser_threshold=500), )
-    return loader.load()
+# def get_python_loader():
+#     loader = GenericLoader.from_filesystem("codes",
+#                                            glob="*/",
+#                                            suffixes=[".cpp", ".h"],
+#                                            parser=LanguageParser(language=Language.CPP, parser_threshold=500), )
+#     return loader.load()
 
+
+def get_all_files_loader():
+    # The base_path should be the path to the directory where your code files are located.
+    loader = GenericLoader.from_filesystem(
+        "codes",  # Base directory where the code files are stored
+        glob="**/*",  # Glob pattern to recursively search for files
+        # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
+        # If you still need to specify suffixes, list all the file extensions you're interested in.
+        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
+        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+    )
+    #return loader.load()  # Load the files and return the parsed data
+# Load the files
+    files = loader.load()  # This may not be the correct method call depending on the langchain implementation.
+
+    # Iterate through the loaded files
+    for file_path in files:
+        print(f"Parsing file: {file_path}")
+        # Here, insert the code that processes each file.
+        # For example, you might have a parser function that takes a file path:
+        # parsed_content = parse_file(file_path)
+
+    return files 
 
 def summarise_file():
     prompt_template = """Write a concise summary of the following:
@@ -47,7 +70,7 @@ def summarise_file():
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
 
-    docs = get_python_loader()
+    docs = get_all_files_loader()
 
     print(docs)
     print("waiting")

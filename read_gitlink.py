@@ -51,6 +51,28 @@ def get_file_content(owner, repo, file_path, token):
     else:
         content = content_data['content']
     return content
+def write_content_to_file(file_path, content):
+    """
+    Writes the content of a GitHub file to a local file with the same extension.
+
+    :param file_path: Path of the file on GitHub
+    :param content: Content of the file to write
+    """
+    # Create directories if they don't exist
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # Write the content to a file
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(content)
+    print(f"File written: {file_path}")
+
+# # Add this to the loop where you process and possibly summarize the content
+# for file_path in file_paths:
+#     content = get_file_content(owner, repo, file_path, token)
+#     # Call the function to write content to file
+#     local_file_path = os.path.join("./codes", file_path)  # Replace 'local_directory' with your desired local path
+#     write_content_to_file(local_file_path, content)
+
 
 # Example usage:
 repo_url = 'https://github.com/KoushikAS/duke-ece-650-project4'  # Replace with the full GitHub repository URL
@@ -62,6 +84,9 @@ try:
     file_paths = get_files_from_repo(repo_url, token, extensions)
     for file_path in file_paths:
         content = get_file_content(owner, repo, file_path, token)
+        # Call the function to write content to file
+        local_file_path = os.path.join("./codes", file_path)  # Replace 'local_directory' with your desired local path
+        write_content_to_file(local_file_path, content)
         # Here, you would process and possibly summarize the content
         #print(content)  # Replace with processing logic
 except requests.HTTPError as e:
