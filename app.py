@@ -29,17 +29,23 @@ def get_pdf_text(pdf_docs):
             text += page.extract_text()
     return text
 
+
 def get_text_from_text_files(directory):
     # Initialize an empty string to store the concatenated text
-    files = [f for f in os.listdir("summary/") if os.path.isfile(os.path.join("summary/", f))]
     content = ""
+
+    # Check if directory is valid
+    if not os.path.exists(directory):
+        raise ValueError(f"Directory {directory} does not exist.")
+
+    # Get a list of text files in the directory
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+
     for file in files:
-        file = open(directory+f"\{file}", "r")
-        content += file.read()
-        
+        with open(os.path.join(directory, file), "r") as file_obj:
+            content += file_obj.read()
+
     return content
-
-
 
 
 def get_all_files_loader():
@@ -76,7 +82,7 @@ def get_file_loader(filename):
 
 
 def summarise_file():
-    prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a summary for each file independently:
+    prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a technical details for each file independently:
             "{text}"
             :"""
     prompt = PromptTemplate.from_template(prompt_template)
@@ -150,8 +156,6 @@ def handle_user_input(user_question):
 def main():
     ## this allows langchain access to the access tokens.Since we are using langchain , follow the same variable format
     load_dotenv()
-
-    read_gitlink.downloadRepo('https://github.com/KoushikAS/duke-ece-650-project4' )
     st.set_page_config(page_title="ProductDoc",page_icon=":books:")
 
     st.write(css, unsafe_allow_html=True)
@@ -165,12 +169,18 @@ def main():
     st.header("Chat - Company :documents:") ## :books: is the emoji for books
 
     with st.sidebar:
-        st.subheader("Your documents")
-        pdf_docs = st.file_uploader("Upload your pdfs here and click on 'Process'", accept_multiple_files=True)   ## allows you to upload files
+
+        git_link = st.text_input("Enter github URL")
+
         if st.button("Summarize"):
+            with st.spinner("Summarising"):
+                read_gitlink.downloadRepo(git_link)
+                summarise_file()
+
+        if st.button("Update DB"):
             with st.spinner("Processing"):
 
-                raw_text = get_text_from_text_files("D:\DUKE\FALL23\DukeGenAI-Team9\summary")
+                raw_text = get_text_from_text_files('summary/')
 
                 ## get the text chunks
                 text_chunks = get_text_chunks(raw_text)
