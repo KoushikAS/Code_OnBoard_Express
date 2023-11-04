@@ -15,7 +15,7 @@ from langchain.chains.summarize import load_summarize_chain
 from htmlTemplates import bot_template, user_template, css
 from langchain.prompts import PromptTemplate
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-
+import os
 
 def get_pdf_text(pdf_docs):
     ### returns a single string with all the raw text from pdfs
@@ -48,17 +48,27 @@ def get_all_files_loader():
         parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
     )
     #return loader.load()  # Load the files and return the parsed data
-# Load the files
+
     files = loader.load()  # This may not be the correct method call depending on the langchain implementation.
 
-    # Iterate through the loaded files
-    for file_path in files:
-        print(f"Parsing file: {file_path}")
-        # Here, insert the code that processes each file.
-        # For example, you might have a parser function that takes a file path:
-        # parsed_content = parse_file(file_path)
+    return files 
+
+def get_file_loader(filename):
+    # The base_path should be the path to the directory where your code files are located.
+    loader = GenericLoader.from_filesystem(
+        "codes/",  # Base directory where the code files are stored
+        glob= filename,  # Glob pattern to recursively search for files
+        # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
+        # If you still need to specify suffixes, list all the file extensions you're interested in.
+        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
+        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+    )
+    #return loader.load()  # Load the files and return the parsed data
+
+    files = loader.load()  # This may not be the correct method call depending on the langchain implementation.
 
     return files 
+
 
 def summarise_file():
     prompt_template = """generate technical documentation for a junior software engineer for the below code:
@@ -70,19 +80,33 @@ def summarise_file():
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
 
-    docs = get_all_files_loader()
+    # docs = get_all_files_loader()
 
-    print(docs)
-    print("waiting")
-    summary_text = stuff_chain.run(docs)
-    print("done")
-    filename = 'test.py'
-    f = open("summary/summary.txt", "a")
-    f.write("\n " + filename +" :\n")
-    f.write(summary_text)
-    f.close()
+    # print(docs)
+    # print("waiting")
+    # summary_text = stuff_chain.run(docs)
+    # print("done")
+    # filename = 'test.py'
+    # f = open("summary/summary.txt", "a")
+    # f.write("\n " + filename +" :\n")
+    # f.write(summary_text)
+    # f.close()
 
-    return
+    summary_file = open("summary/summary.txt", "a")
+
+    files = [f for f in os.listdir("codes/") if os.path.isfile(os.path.join("codes/", f))]
+
+    for filename in files:
+        docs = get_file_loader(filename)
+        print(filename)
+        print(docs)
+        summary_text = stuff_chain.run(docs)
+        print("done")
+        summary_file.write("\n " + filename +" :\n")
+        summary_file.write(summary_text)
+
+    summary_file.close()
+    return docs
 
 
 def get_text_chunks(raw_text):
