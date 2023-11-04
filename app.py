@@ -133,9 +133,9 @@ def get_conversation_chain(vectorstore):
     return converstation_chain
 
 
-def handle_user_input(user_question):
-    print(st)
-    response = st.session_state.conversation({'question': user_question})
+def handle_user_input(user_question, user):
+    prompt = f"Explain the query {user_question} to the user who is a {user}"
+    response = st.session_state.conversation({'question': prompt})
 
     # Update the chat history
     st.session_state.chat_history = response['chat_history']
@@ -167,16 +167,27 @@ def main():
         st.session_state.chat_history = None
 
     st.header("Chat - Company :documents:") ## :books: is the emoji for books
+    
 
     with st.sidebar:
 
+        user = st.selectbox('Select the user type',('Technical Users','Non-technical users'))
+
+        summary_type = st.selectbox('Document Generation',('','Technical Document','Short Summary'))
+
         git_link = st.text_input("Enter github URL")
 
-        if st.button("Summarize"):
-            with st.spinner("Summarising"):
+        if summary_type == "Technical Document":
+            with st.spinner("Summarizing"):
                 read_gitlink.downloadRepo(git_link)
                 summarise_file()
-
+        
+        if summary_type == "Short Summary":
+            with st.spinner("Summarizing"):
+                ## insert code
+                read_gitlink.downloadRepo(git_link)
+                summarise_file()
+                
         if st.button("Update DB"):
             with st.spinner("Processing"):
 
@@ -203,7 +214,7 @@ def main():
 
     user_question = st.text_input("Ask a question:")
     if user_question:
-        handle_user_input(user_question)
+        handle_user_input(user_question,user)
 
 
 if __name__ == "__main__":
