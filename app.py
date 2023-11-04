@@ -50,10 +50,10 @@ def get_text_from_text_files(directory):
     return content
 
 
-def get_all_files_loader():
+def get_all_files_loader(project_name):
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
-        "codes",  # Base directory where the code files are stored
+        f"codes/{project_name}",  # Base directory where the code files are stored
         glob= '**/*',   # Glob pattern to recursively search for files
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
@@ -66,11 +66,11 @@ def get_all_files_loader():
 
     return files 
 
-def get_file_loader():
+def get_file_loader(filename,project_name):
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
-        "codes/",  # Base directory where the code files are stored
-        glob= '**/[!.]*', 
+        f"codes/{project_name}",  # Base directory where the code files are stored
+        glob= '**/*/'+filename, 
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
         parser=LanguageParser(parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
@@ -98,7 +98,7 @@ def generate_glob_pattern_for_all_subdirectories(base_directory):
 # glob_pattern = generate_glob_pattern_for_all_subdirectories(base_directory)
 # print(f"Glob pattern for all subdirectories: '{glob_pattern}'")
 
-def summarise_file():
+def summarise_file(project_name):
     prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a technical details for each file independently:
             "{text}"
             :"""
@@ -108,7 +108,7 @@ def summarise_file():
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
 
-    docs = get_all_files_loader()
+    docs = get_all_files_loader(project_name)
 
     print(docs)
     print("waiting")
@@ -120,7 +120,7 @@ def summarise_file():
 
 
 
-def summarise_depth():
+def summarise_depth(project_name):
     prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a technical details for each file independently:
             "{text}"
             :"""
@@ -136,20 +136,33 @@ def summarise_depth():
     directory = Path(directory_path)
 
     # Recursively list all filenames in the directory and its subdirectories
-    for file_path in directory.rglob('*'):
-        if file_path.is_file():
-            print(file_path)
-            filename = file_path.name
+    # for file_path in directory.rglob('*'):
+    #     if file_path.is_file():
+    #         print(file_path)
+    #         filename = file_path.name
         
-        relative_file_path = os.path.relpath(filename, directory_path)
-        summary_file = open(f"summary/summary_{os.path.basename(filename)}.txt", "a+")
+    #         relative_file_path = os.path.relpath(filename, directory_path)
+    #         summary_file = open(f"summary/summary_{os.path.basename(filename)}.txt", "a+")
 
-        docs = get_file_loader()
+    #         docs = get_file_loader(filename)
+    #         summary_text = stuff_chain.run(docs)
+    #         print("done")
+    #         summary_file.write("\n " + os.path.basename(relative_file_path) +" :\n")
+    #         summary_file.write(summary_text)
+    #         summary_file.close()
+
+    files = [f for f in os.listdir(f"codes/{project_name}") if os.path.isfile(os.path.join(f"codes/{project_name}", f))]
+
+    for filename in files:
+        summary_file = open(f"summary/summary_{filename}.txt", "a+")
+        docs = get_file_loader(filename,project_name)
+        print(filename)
+        print(docs)
         summary_text = stuff_chain.run(docs)
         print("done")
-        summary_file.write("\n " + os.path.basename(relative_file_path) +" :\n")
+        summary_file.write("\n " + filename +" :\n")
         summary_file.write(summary_text)
-        summary_file.close()
+        summary_file.close() #just added
 
 
 def get_text_chunks(raw_text):
@@ -222,13 +235,13 @@ def main():
 
         if st.button("Short Summary"):
             with st.spinner("Summarising"):
-                read_gitlink.downloadRepo(git_link)
-                summarise_file()
+                project_name = read_gitlink.downloadRepo(git_link)
+                summarise_file(project_name)
 
         if st.button("Indepth Summary"):
             with st.spinner("Summarising"):
-                read_gitlink.downloadRepo(git_link)
-                summarise_depth()
+                project_name = read_gitlink.downloadRepo(git_link)
+                summarise_depth(project_name)
 
         if st.button("Add knowledge"):
             with st.spinner("Processing"):
@@ -250,9 +263,6 @@ def main():
                 # if we are using sessiom state initialize it before
 
                 st.session_state.conversation = get_conversation_chain(vectorstore)
-
-
-
 
     user_question = st.text_input("Ask a question:")
     if user_question:

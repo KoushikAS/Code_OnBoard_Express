@@ -82,7 +82,7 @@ def downloadRepo(repo_url):
 
 # Check if the directory exists, if not, create it
     if not os.path.exists(project_name):
-        os.makedirs(project_name)
+        os.makedirs(f"./codes/{project_name}")
         print(f"Directory '{project_name}' created.")
     else:
         print(f"Directory '{project_name}' already exists.")
@@ -106,3 +106,5 @@ def downloadRepo(repo_url):
         print(f"HTTP Error: {e.response.json()}")
     except Exception as e:
         print(f"An error occurred: {e}")
+    
+    return project_name
