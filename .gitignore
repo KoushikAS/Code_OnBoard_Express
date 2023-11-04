@@ -1,8 +1,8 @@
 .idea/
-summary/summary.txt
+
 .DS_Store
 codes/
-summary/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
