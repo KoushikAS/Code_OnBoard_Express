@@ -1,6 +1,10 @@
 .idea/
-summary/summary.txt
-.Ds_Store
+
+.DS_Store
+codes/
+summary/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
