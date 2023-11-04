@@ -38,9 +38,9 @@ def get_python_loader():
 
 
 def summarise_file():
-    prompt_template = """Write a concise summary of the following:
-        "{text}"
-        CONCISE SUMMARY:"""
+    prompt_template = """generate technical documentation for a junior software engineer for the below code:
+            "{text}"
+            SUMMARY:"""
     prompt = PromptTemplate.from_template(prompt_template)
 
     llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k")
@@ -53,7 +53,9 @@ def summarise_file():
     print("waiting")
     summary_text = stuff_chain.run(docs)
     print("done")
+    filename = 'test.py'
     f = open("summary/summary.txt", "a")
+    f.write("\n " + filename +" :\n")
     f.write(summary_text)
     f.close()
 
@@ -131,28 +133,6 @@ def main():
         if st.button("Summarize"):
             with st.spinner("Processing"):
                 summarise_file()
-
-        if st.button("Process"):
-            with st.spinner("Processing"):    ## all the processes under this will be happening while a spinner spins - benefit of the user
-                ## get pdf text
-
-                raw_text = get_pdf_text(pdf_docs)
-
-                ## get the text chunks
-                text_chunks = get_text_chunks(raw_text)
-
-                ## create vector store
-                vectorstore = get_vectorstore(text_chunks)
-
-                ## semantic search
-
-                ## create conversation chain
-                #session state lets streamlit know that this variable should not be reinitialized in this session
-                # the reinitialization could be triggered each time we click on 'Process'
-                # if we set the session state we can also use it outside of scope (outside of 'Process')
-                # if we are using sessiom state initialize it before
-
-                st.session_state.conversation = get_conversation_chain(vectorstore)
 
     user_question = st.text_input("Ask a question:")
     if user_question:
