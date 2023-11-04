@@ -16,6 +16,8 @@ from htmlTemplates import bot_template, user_template, css
 from langchain.prompts import PromptTemplate
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 import os
+from pathlib import Path
+
 
 def get_pdf_text(pdf_docs):
     ### returns a single string with all the raw text from pdfs
@@ -41,7 +43,7 @@ def get_all_files_loader():
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
         "codes",  # Base directory where the code files are stored
-        glob="**/*",  # Glob pattern to recursively search for files
+        glob="**/**/",  # Glob pattern to recursively search for files
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
         suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
@@ -57,11 +59,11 @@ def get_file_loader(filename):
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
         "codes/",  # Base directory where the code files are stored
-        glob= filename,  # Glob pattern to recursively search for files
+        glob= '**/[!.]*', 
+        exclude=["**/*.txt", "**/*.md"], # Glob pattern to recursively search for files
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
-        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
-        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+        parser=LanguageParser(parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
     )
     #return loader.load()  # Load the files and return the parsed data
 
@@ -69,6 +71,22 @@ def get_file_loader(filename):
 
     return files 
 
+def generate_glob_pattern_for_all_subdirectories(base_directory):
+    """
+    Generate a glob pattern for files in all subdirectories of the base directory.
+
+    :param base_directory: The base directory to start the glob pattern from.
+    :return: A glob pattern string.
+    """
+    # The '**' matches any files and any directories and subdirectories underneath the base directory
+    # The '*' matches any file within these directories
+    glob_pattern = os.path.join(base_directory, '**', '*')
+    return glob_pattern
+
+# # Example usage:
+# base_directory = "codes"  # Replace with your actual base directory
+# glob_pattern = generate_glob_pattern_for_all_subdirectories(base_directory)
+# print(f"Glob pattern for all subdirectories: '{glob_pattern}'")
 
 def summarise_file():
     prompt_template = """generate technical documentation for a junior software engineer for the below code:
@@ -92,21 +110,55 @@ def summarise_file():
     # f.write(summary_text)
     # f.close()
 
-    summary_file = open("summary/summary.txt", "a")
+    #summary_file = open("summary/summary.txt", "a+")
+# Assuming 'codes/' is a directory containing your code files and subdirectories with code files
+    # base_path = "codes/"
 
-    files = [f for f in os.listdir("codes/") if os.path.isfile(os.path.join("codes/", f))]
+    # # Create a list of all files within 'codes/' and its subdirectories
+    # files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(base_path) for f in filenames]
 
-    for filename in files:
+    directory_path = 'codes/'
+
+    # Create a Path object for the directory
+    directory = Path(directory_path)
+
+    # Recursively list all filenames in the directory and its subdirectories
+    for file_path in directory.rglob('*'):
+        if file_path.is_file():
+            print(file_path)
+            filename = file_path.name
+
+    #for filename in files:
+        # Calculate a relative path to pass to the loader
+        relative_file_path = os.path.relpath(filename, directory_path)
+        
+        summary_file = open(f"summary/summary_{os.path.basename(filename)}.txt", "a+")
         docs = get_file_loader(filename)
-        print(filename)
+        print(relative_file_path)
         print(docs)
         summary_text = stuff_chain.run(docs)
         print("done")
-        summary_file.write("\n " + filename +" :\n")
+        summary_file.write("\n " + os.path.basename(relative_file_path) +" :\n")
         summary_file.write(summary_text)
+        summary_file.close()
 
-    summary_file.close()
-    return docs
+# Return the docs if needed, otherwise this line can be removed
+# return docs
+
+    # files = [f for f in os.listdir("codes/") if os.path.isfile(os.path.join("codes/", f))]
+
+    # for filename in files:
+    #     summary_file = open(f"summary/summary_{filename}.txt", "a+")
+    #     docs = get_file_loader(filename)
+    #     print(filename)
+    #     print(docs)
+    #     summary_text = stuff_chain.run(docs)
+    #     print("done")
+    #     summary_file.write("\n " + filename +" :\n")
+    #     summary_file.write(summary_text)
+
+    # summary_file.close()
+    # return docs
 
 
 def get_text_chunks(raw_text):
