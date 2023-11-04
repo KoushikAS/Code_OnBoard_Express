@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urljoin
 # Set to GitHub's API base URL
 load_dotenv()
 GITHUB_API_URL = 'https://api.github.com/'
-print(os.getenv('GITACC_TOKEN'))
+#print(os.getenv('GITACC_TOKEN'))
 def parse_github_repo_url(repo_url):
     """
     Parses a GitHub repository URL and extracts the owner and repository name.
@@ -54,7 +54,7 @@ def get_file_content(owner, repo, file_path, token):
 
 # Example usage:
 repo_url = 'https://github.com/KoushikAS/duke-ece-650-project4'  # Replace with the full GitHub repository URL
-extensions = ('.cpp')
+extensions = ('.cpp','.h','.py','.java','.txt','.md')
 token = os.getenv('GITACC_TOKEN') # Replace with your GitHub token
 
 try:
@@ -63,7 +63,7 @@ try:
     for file_path in file_paths:
         content = get_file_content(owner, repo, file_path, token)
         # Here, you would process and possibly summarize the content
-        print(content)  # Replace with processing logic
+        #print(content)  # Replace with processing logic
 except requests.HTTPError as e:
     print(f"HTTP Error: {e.response.json()}")
 except Exception as e:
