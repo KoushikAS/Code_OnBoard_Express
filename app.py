@@ -132,7 +132,26 @@ def main():
         pdf_docs = st.file_uploader("Upload your pdfs here and click on 'Process'", accept_multiple_files=True)   ## allows you to upload files
         if st.button("Summarize"):
             with st.spinner("Processing"):
-                summarise_file()
+                raw_text = summarise_file()
+
+                ## get the text chunks
+                text_chunks = get_text_chunks(raw_text)
+
+                ## create vector store
+                vectorstore = get_vectorstore(text_chunks)
+
+                ## semantic search
+
+                ## create conversation chain
+                # session state lets streamlit know that this variable should not be reinitialized in this session
+                # the reinitialization could be triggered each time we click on 'Process'
+                # if we set the session state we can also use it outside of scope (outside of 'Process')
+                # if we are using sessiom state initialize it before
+
+                st.session_state.conversation = get_conversation_chain(vectorstore)
+
+
+
 
     user_question = st.text_input("Ask a question:")
     if user_question:
