@@ -15,7 +15,8 @@ from langchain.chains.summarize import load_summarize_chain
 from htmlTemplates import bot_template, user_template, css
 from langchain.prompts import PromptTemplate
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-
+import os
+import read_gitlink
 
 def get_pdf_text(pdf_docs):
     ### returns a single string with all the raw text from pdfs
@@ -29,37 +30,78 @@ def get_pdf_text(pdf_docs):
     return text
 
 
-def get_python_loader():
-    loader = GenericLoader.from_filesystem("codes",
-                                           glob="*/",
-                                           suffixes=[".py"],
-                                           parser=LanguageParser(language=Language.PYTHON, parser_threshold=500), )
-    return loader.load()
+def get_text_from_text_files(directory):
+    # Initialize an empty string to store the concatenated text
+    content = ""
+
+    # Check if directory is valid
+    if not os.path.exists(directory):
+        raise ValueError(f"Directory {directory} does not exist.")
+
+    # Get a list of text files in the directory
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+
+    for file in files:
+        with open(os.path.join(directory, file), "r") as file_obj:
+            content += file_obj.read()
+
+    return content
+
+
+def get_all_files_loader():
+    # The base_path should be the path to the directory where your code files are located.
+    loader = GenericLoader.from_filesystem(
+        "codes",  # Base directory where the code files are stored
+        glob="**/*",  # Glob pattern to recursively search for files
+        # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
+        # If you still need to specify suffixes, list all the file extensions you're interested in.
+        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
+        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+    )
+    #return loader.load()  # Load the files and return the parsed data
+
+    files = loader.load()  # This may not be the correct method call depending on the langchain implementation.
+
+    return files 
+
+def get_file_loader(filename):
+    # The base_path should be the path to the directory where your code files are located.
+    loader = GenericLoader.from_filesystem(
+        "codes/",  # Base directory where the code files are stored
+        glob= '**/*/' + filename,  # Glob pattern to recursively search for files
+        # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
+        # If you still need to specify suffixes, list all the file extensions you're interested in.
+        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
+        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+    )
+    #return loader.load()  # Load the files and return the parsed data
+
+    files = loader.load()  # This may not be the correct method call depending on the langchain implementation.
+
+    return files 
 
 
 def summarise_file():
-    prompt_template = """generate technical documentation for a junior software engineer for the below code:
+    prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a technical details for each file independently:
             "{text}"
-            SUMMARY:"""
+            :"""
     prompt = PromptTemplate.from_template(prompt_template)
 
     llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k")
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
 
-    docs = get_python_loader()
+    docs = get_all_files_loader()
 
     print(docs)
     print("waiting")
     summary_text = stuff_chain.run(docs)
     print("done")
-    filename = 'test.py'
-    f = open("summary/summary.txt", "a")
-    f.write("\n " + filename +" :\n")
+    f = open("summary/summary.txt", "a+")
     f.write(summary_text)
     f.close()
 
-    return
+    return docs
 
 
 def get_text_chunks(raw_text):
@@ -114,7 +156,6 @@ def handle_user_input(user_question):
 def main():
     ## this allows langchain access to the access tokens.Since we are using langchain , follow the same variable format
     load_dotenv()
-
     st.set_page_config(page_title="ProductDoc",page_icon=":books:")
 
     st.write(css, unsafe_allow_html=True)
@@ -128,11 +169,18 @@ def main():
     st.header("Chat - Company :documents:") ## :books: is the emoji for books
 
     with st.sidebar:
-        st.subheader("Your documents")
-        pdf_docs = st.file_uploader("Upload your pdfs here and click on 'Process'", accept_multiple_files=True)   ## allows you to upload files
+
+        git_link = st.text_input("Enter github URL")
+
         if st.button("Summarize"):
+            with st.spinner("Summarising"):
+                read_gitlink.downloadRepo(git_link)
+                summarise_file()
+
+        if st.button("Update DB"):
             with st.spinner("Processing"):
-                raw_text = summarise_file()
+
+                raw_text = get_text_from_text_files('summary/')
 
                 ## get the text chunks
                 text_chunks = get_text_chunks(raw_text)
