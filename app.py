@@ -16,6 +16,7 @@ from htmlTemplates import bot_template, user_template, css
 from langchain.prompts import PromptTemplate
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 import os
+import read_gitlink
 
 def get_pdf_text(pdf_docs):
     ### returns a single string with all the raw text from pdfs
@@ -40,13 +41,6 @@ def get_text_from_text_files(directory):
 
 
 
-# def get_python_loader():
-#     loader = GenericLoader.from_filesystem("codes",
-#                                            glob="*/",
-#                                            suffixes=[".cpp", ".h"],
-#                                            parser=LanguageParser(language=Language.CPP, parser_threshold=500), )
-#     return loader.load()
-
 
 def get_all_files_loader():
     # The base_path should be the path to the directory where your code files are located.
@@ -68,7 +62,7 @@ def get_file_loader(filename):
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
         "codes/",  # Base directory where the code files are stored
-        glob= filename,  # Glob pattern to recursively search for files
+        glob= '**/*/' + filename,  # Glob pattern to recursively search for files
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
         suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
@@ -82,41 +76,25 @@ def get_file_loader(filename):
 
 
 def summarise_file():
-    prompt_template = """generate technical documentation for a junior software engineer for the below code:
+    prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a summary for each file independently:
             "{text}"
-            SUMMARY:"""
+            :"""
     prompt = PromptTemplate.from_template(prompt_template)
 
     llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k")
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
 
-    # docs = get_all_files_loader()
+    docs = get_all_files_loader()
 
-    # print(docs)
-    # print("waiting")
-    # summary_text = stuff_chain.run(docs)
-    # print("done")
-    # filename = 'test.py'
-    # f = open("summary/summary.txt", "a")
-    # f.write("\n " + filename +" :\n")
-    # f.write(summary_text)
-    # f.close()
+    print(docs)
+    print("waiting")
+    summary_text = stuff_chain.run(docs)
+    print("done")
+    f = open("summary/summary.txt", "a+")
+    f.write(summary_text)
+    f.close()
 
-    summary_file = open("summary/summary.txt", "a")
-
-    files = [f for f in os.listdir("codes/") if os.path.isfile(os.path.join("codes/", f))]
-
-    for filename in files:
-        docs = get_file_loader(filename)
-        print(filename)
-        print(docs)
-        summary_text = stuff_chain.run(docs)
-        print("done")
-        summary_file.write("\n " + filename +" :\n")
-        summary_file.write(summary_text)
-
-    summary_file.close()
     return docs
 
 
@@ -173,6 +151,7 @@ def main():
     ## this allows langchain access to the access tokens.Since we are using langchain , follow the same variable format
     load_dotenv()
 
+    read_gitlink.downloadRepo('https://github.com/KoushikAS/duke-ece-650-project4' )
     st.set_page_config(page_title="ProductDoc",page_icon=":books:")
 
     st.write(css, unsafe_allow_html=True)

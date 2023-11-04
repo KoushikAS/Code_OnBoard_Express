@@ -75,21 +75,22 @@ def write_content_to_file(file_path, content):
 
 
 # Example usage:
-repo_url = 'https://github.com/KoushikAS/duke-ece-650-project4'  # Replace with the full GitHub repository URL
-extensions = ('.cpp','.h','.py','.java','.txt','.md')
-token = os.getenv('GITACC_TOKEN') # Replace with your GitHub token
 
-try:
-    owner, repo = parse_github_repo_url(repo_url)
-    file_paths = get_files_from_repo(repo_url, token, extensions)
-    for file_path in file_paths:
-        content = get_file_content(owner, repo, file_path, token)
-        # Call the function to write content to file
-        local_file_path = os.path.join("./codes", file_path)  # Replace 'local_directory' with your desired local path
-        write_content_to_file(local_file_path, content)
-        # Here, you would process and possibly summarize the content
-        #print(content)  # Replace with processing logic
-except requests.HTTPError as e:
-    print(f"HTTP Error: {e.response.json()}")
-except Exception as e:
-    print(f"An error occurred: {e}")
+def downloadRepo(repo_url):
+    extensions = ('.cpp','.h','.py','.java','.txt','.md')
+    token = os.getenv('GITACC_TOKEN') # Replace with your GitHub token
+
+    try:
+        owner, repo = parse_github_repo_url(repo_url)
+        file_paths = get_files_from_repo(repo_url, token, extensions)
+        for file_path in file_paths:
+            content = get_file_content(owner, repo, file_path, token)
+            # Call the function to write content to file
+            local_file_path = os.path.join("./codes", file_path)  # Replace 'local_directory' with your desired local path
+            write_content_to_file(local_file_path, content)
+            # Here, you would process and possibly summarize the content
+            #print(content)  # Replace with processing logic
+    except requests.HTTPError as e:
+        print(f"HTTP Error: {e.response.json()}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
