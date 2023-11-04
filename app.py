@@ -28,6 +28,17 @@ def get_pdf_text(pdf_docs):
             text += page.extract_text()
     return text
 
+def get_text_from_text_files(directory):
+    # Initialize an empty string to store the concatenated text
+    files = [f for f in os.listdir("summary/") if os.path.isfile(os.path.join("summary/", f))]
+    content = ""
+    for file in files:
+        file = open(directory+f"\{file}", "r")
+        content += file.read()
+        
+    return content
+
+
 
 # def get_python_loader():
 #     loader = GenericLoader.from_filesystem("codes",
@@ -179,7 +190,8 @@ def main():
         pdf_docs = st.file_uploader("Upload your pdfs here and click on 'Process'", accept_multiple_files=True)   ## allows you to upload files
         if st.button("Summarize"):
             with st.spinner("Processing"):
-                raw_text = summarise_file()
+
+                raw_text = get_text_from_text_files("D:\DUKE\FALL23\DukeGenAI-Team9\summary")
 
                 ## get the text chunks
                 text_chunks = get_text_chunks(raw_text)
