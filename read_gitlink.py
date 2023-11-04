@@ -77,6 +77,16 @@ def write_content_to_file(file_path, content):
 # Example usage:
 
 def downloadRepo(repo_url):
+    # Extract the project name using split
+    project_name = repo_url.split('/')[-1]
+
+# Check if the directory exists, if not, create it
+    if not os.path.exists(project_name):
+        os.makedirs(project_name)
+        print(f"Directory '{project_name}' created.")
+    else:
+        print(f"Directory '{project_name}' already exists.")
+    
     extensions = ('.cpp','.h','.py','.java','.txt','.md')
     token = os.getenv('GITACC_TOKEN') # Replace with your GitHub token
 
@@ -85,8 +95,10 @@ def downloadRepo(repo_url):
         file_paths = get_files_from_repo(repo_url, token, extensions)
         for file_path in file_paths:
             content = get_file_content(owner, repo, file_path, token)
+
             # Call the function to write content to file
-            local_file_path = os.path.join("./codes", file_path)  # Replace 'local_directory' with your desired local path
+            local_file_path = os.path.join(f"./codes/{project_name}", file_path)  # Replace 'local_directory' with your desired local path
+
             write_content_to_file(local_file_path, content)
             # Here, you would process and possibly summarize the content
             #print(content)  # Replace with processing logic
