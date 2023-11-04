@@ -1,10 +1,13 @@
 import requests
+import os
 import base64
+from dotenv import load_dotenv
 from urllib.parse import urlparse, urljoin
 
 # Set to GitHub's API base URL
+load_dotenv()
 GITHUB_API_URL = 'https://api.github.com/'
-
+print(os.getenv('GITACC_TOKEN'))
 def parse_github_repo_url(repo_url):
     """
     Parses a GitHub repository URL and extracts the owner and repository name.
@@ -52,7 +55,7 @@ def get_file_content(owner, repo, file_path, token):
 # Example usage:
 repo_url = 'https://github.com/KoushikAS/duke-ece-650-project4'  # Replace with the full GitHub repository URL
 extensions = ('.cpp')
-token = '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'  # Replace with your GitHub token
+token = os.getenv('GITACC_TOKEN') # Replace with your GitHub token
 
 try:
     owner, repo = parse_github_repo_url(repo_url)
