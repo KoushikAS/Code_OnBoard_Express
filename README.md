@@ -9,3 +9,9 @@ With onboard express we plan to do exactly that. Reducing the turnaround time by
 So that your new hire can get involved in the development process quicker. Clients get their issues resolved faster. 
 
 So people can do what they are best at- "create".
+
+
+---------------------------------------------------------------------------
+To run this
+pip install -r requirements.txt
+streamlit run app.py
