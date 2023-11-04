@@ -48,7 +48,11 @@ def get_text_from_text_files(directory):
             content += file_obj.read()
 
     return content
-
+def get_code_chunks(raw_docs):
+    code_chunks = ''
+    for doc in raw_docs:
+        code_chunks += str(doc)
+    return code_chunks
 
 def get_all_files_loader(project_name):
     # The base_path should be the path to the directory where your code files are located.
@@ -232,6 +236,8 @@ def main():
     with st.sidebar:
 
         git_link = st.text_input("Enter github URL")
+        #project_name = read_gitlink.downloadRepo(git_link)
+
 
         if st.button("Short Summary"):
             with st.spinner("Summarising"):
@@ -243,7 +249,15 @@ def main():
                 project_name = read_gitlink.downloadRepo(git_link)
                 summarise_depth(project_name)
 
-        if st.button("Add knowledge"):
+        if st.button("DukeECE650"):
+            with st.spinner("Processing"):
+                raw_code = get_all_files_loader('duke-ece-650-project4')
+                print('testing for one file',raw_code[1])
+                code_chunks = get_code_chunks(raw_code[1])
+                vectorstore = get_vectorstore(code_chunks)
+                st.session_state.conversation = get_conversation_chain(vectorstore)
+
+        if st.button("Add Knowledge"):
             with st.spinner("Processing"):
 
                 raw_text = get_text_from_text_files('summary/')
