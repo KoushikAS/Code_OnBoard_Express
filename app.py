@@ -16,7 +16,9 @@ from htmlTemplates import bot_template, user_template, css
 from langchain.prompts import PromptTemplate
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 import os
+from pathlib import Path
 import read_gitlink
+
 
 def get_pdf_text(pdf_docs):
     ### returns a single string with all the raw text from pdfs
@@ -52,15 +54,15 @@ def get_all_files_loader():
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
         "codes",  # Base directory where the code files are stored
-        glob="**/*",  # Glob pattern to recursively search for files
+        glob= '**/*',   # Glob pattern to recursively search for files
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
-        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
-        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+        parser=LanguageParser(parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
     )
     #return loader.load()  # Load the files and return the parsed data
-
+    print(loader)
     files = loader.load()  # This may not be the correct method call depending on the langchain implementation.
+    print(files)
 
     return files 
 
@@ -68,11 +70,10 @@ def get_file_loader(filename):
     # The base_path should be the path to the directory where your code files are located.
     loader = GenericLoader.from_filesystem(
         "codes/",  # Base directory where the code files are stored
-        glob= '**/*/' + filename,  # Glob pattern to recursively search for files
+        glob= '**/*' + filename,
         # If the loader supports loading all file types without specifying suffixes, you can comment out or remove the line below.
         # If you still need to specify suffixes, list all the file extensions you're interested in.
-        suffixes=[".cpp", ".h", ".py", ".java", ".txt", ".md", "..."],  # Add all file extensions you want to include
-        parser=LanguageParser(language=Language.CPP, parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
+        parser=LanguageParser(parser_threshold=500)  # Use AUTO if the parser can automatically detect the language, otherwise, you may need separate parsers for each language type
     )
     #return loader.load()  # Load the files and return the parsed data
 
@@ -80,6 +81,22 @@ def get_file_loader(filename):
 
     return files 
 
+def generate_glob_pattern_for_all_subdirectories(base_directory):
+    """
+    Generate a glob pattern for files in all subdirectories of the base directory.
+
+    :param base_directory: The base directory to start the glob pattern from.
+    :return: A glob pattern string.
+    """
+    # The '**' matches any files and any directories and subdirectories underneath the base directory
+    # The '*' matches any file within these directories
+    glob_pattern = os.path.join(base_directory, '**', '*')
+    return glob_pattern
+
+# # Example usage:
+# base_directory = "codes"  # Replace with your actual base directory
+# glob_pattern = generate_glob_pattern_for_all_subdirectories(base_directory)
+# print(f"Glob pattern for all subdirectories: '{glob_pattern}'")
 
 def summarise_file():
     prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a technical details for each file independently:
@@ -97,11 +114,42 @@ def summarise_file():
     print("waiting")
     summary_text = stuff_chain.run(docs)
     print("done")
-    f = open("summary/summary.txt", "a+")
+    f = open("summary/quicksummary.txt", "a+")
     f.write(summary_text)
     f.close()
 
-    return docs
+
+
+def summarise_depth():
+    prompt_template = """generate technical documentation for a junior software engineer for the below code base by giving a technical details for each file independently:
+            "{text}"
+            :"""
+    prompt = PromptTemplate.from_template(prompt_template)
+
+    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-16k")
+    llm_chain = LLMChain(llm=llm, prompt=prompt)
+    stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
+
+    directory_path = 'codes/'
+
+    # Create a Path object for the directory
+    directory = Path(directory_path)
+
+    # Recursively list all filenames in the directory and its subdirectories
+    for file_path in directory.rglob('*'):
+        if file_path.is_file():
+            print(file_path)
+            filename = file_path.name
+        
+            relative_file_path = os.path.relpath(filename, directory_path)
+            summary_file = open(f"summary/summary_{os.path.basename(filename)}.txt", "a+")
+
+            docs = get_file_loader(filename)
+            summary_text = stuff_chain.run(docs)
+            print("done")
+            summary_file.write("\n " + os.path.basename(relative_file_path) +" :\n")
+            summary_file.write(summary_text)
+            summary_file.close()
 
 
 def get_text_chunks(raw_text):
@@ -177,18 +225,17 @@ def main():
 
         git_link = st.text_input("Enter github URL")
 
-        if summary_type == "Technical Document":
-            with st.spinner("Summarizing"):
+        if st.button("Short Summary"):
+            with st.spinner("Summarising"):
                 read_gitlink.downloadRepo(git_link)
                 summarise_file()
-        
-        if summary_type == "Short Summary":
-            with st.spinner("Summarizing"):
-                ## insert code
+
+        if st.button("Indepth Summary"):
+            with st.spinner("Summarising"):
                 read_gitlink.downloadRepo(git_link)
-                summarise_file()
-                
-        if st.button("Update DB"):
+                summarise_depth()
+
+        if st.button("Add knowledge"):
             with st.spinner("Processing"):
 
                 raw_text = get_text_from_text_files('summary/')
