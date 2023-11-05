@@ -166,16 +166,55 @@ def handle_user_input(user_question, user):
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
 
-st.set_page_config(page_title="Chat with Repo1", page_icon="i")
 
-user = st.selectbox('Select the user type',('Technical Users','Non-technical users'))
+def main():
+    ## this allows langchain access to the access tokens.Since we are using langchain , follow the same variable format
+    load_dotenv()
 
-if st.button("Chat with Repo 1"):
-    raw_text = get_content_from_files('summary/','summary.txt')
-    text_chunks = get_text_chunks(raw_text)
-    vectorstore = get_vectorstore(text_chunks)
-    st.session_state.conversation = get_conversation_chain(vectorstore)
+    st.set_page_config(
+        page_title="Hello",
+        page_icon="👋",
+    )
 
-user_question = st.text_input("Ask a question:")
-if user_question:
-    handle_user_input(user_question,user)
+    st.write("# Welcome to Enterprise CodeBuddy! 🤖")
+
+    #st.sidebar.success("Select a Repo below.")
+
+    st.markdown(
+        """
+        CodeBuddy can help you
+
+        1. Generate technical documentation for your repo 
+        2. Chat with repo
+        3. Streamline Knowledge Transfer
+        
+        """)
+    st.write(css, unsafe_allow_html=True)
+
+
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = None
+
+   
+    
+
+    with st.sidebar:
+        if st.button("Update DB"):
+            with st.spinner("Processing"):
+
+                raw_text = get_content_from_files('summary/')
+
+                ## get the text chunks
+                text_chunks = get_text_chunks(raw_text)
+                print('length:',type(text_chunks[0]))
+
+                ## create vector store
+                vectorstore = get_vectorstore(text_chunks)
+
+                st.session_state.conversation = get_conversation_chain(vectorstore)
+
+
+if __name__ == "__main__":
+    main()

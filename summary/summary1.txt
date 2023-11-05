@@ -1,0 +1,57 @@
+Technical Documentation for the Code Base:
+
+File: project1.py
+
+Description:
+This file contains the implementation of various sorting algorithms, including Selection Sort, Insertion Sort, Bubble Sort, Merge Sort, and Quick Sort. It also includes a main function that tests the sorting algorithms using provided testing code.
+
+Functions:
+1. SelectionSort(listToSort): Implements the Selection Sort algorithm to sort a given list in ascending order. It returns the sorted list.
+
+2. InsertionSort(listToSort): Implements the Insertion Sort algorithm to sort a given list in ascending order. It returns the sorted list.
+
+3. BubbleSort(listToSort): Implements the Bubble Sort algorithm to sort a given list in ascending order. It returns the sorted list.
+
+4. MergeSort(listToSort): Implements the Merge Sort algorithm to sort a given list in ascending order. It returns the sorted list.
+
+5. QuickSort(listToSort, i=0, j=None): Implements the Quick Sort algorithm to sort a given list in ascending order. It returns the sorted list. The optional parameters i and j can be used to specify the range of the list to be sorted.
+
+6. isSorted(unsortedList, sortedList): Helper function that checks if a given list has been properly sorted. It compares the sorted list with the original unsorted list and returns True if they are equal, and False otherwise.
+
+7. testingSuite(alg): Function that runs a number of tests using the input algorithm and checks if the sorting was successful. It prints which tests passed and failed.
+
+8. measureTime(preSorted=False, numTrials=30): Function that generates lists of varying lengths and sorts them using the implemented sorting algorithms. It times these sorting operations and stores the average time across multiple trials. It also creates plots of runtime vs n and outputs the slope of the log-log plots for several sorting algorithms.
+
+File: project1tests.py
+
+Description:
+This file contains the provided testing code for the sorting algorithms. It includes functions to test the sorting algorithms and measure their runtime.
+
+Functions:
+1. isSorted(unsortedList, sortedList): Helper function that checks if a given list has been properly sorted. It compares the sorted list with the original unsorted list and returns True if they are equal, and False otherwise.
+
+2. testingSuite(alg): Function that runs a number of tests using the input algorithm and checks if the sorting was successful. It prints which tests passed and failed.
+
+3. measureTime(preSorted=False, numTrials=30): Function that generates lists of varying lengths and sorts them using the implemented sorting algorithms. It times these sorting operations and stores the average time across multiple trials. It also creates plots of runtime vs n and outputs the slope of the log-log plots for several sorting algorithms.
+
+File: project1tests.py
+
+Description:
+This file contains the provided testing code for the sorting algorithms. It includes functions to test the sorting algorithms and measure their runtime.
+
+Functions:
+1. isSorted(unsortedList, sortedList): Helper function that checks if a given list has been properly sorted. It compares the sorted list with the original unsorted list and returns True if they are equal, and False otherwise.
+
+2. testingSuite(alg): Function that runs a number of tests using the input algorithm and checks if the sorting was successful. It prints which tests passed and failed.
+
+3. measureTime(preSorted=False, numTrials=30): Function that generates lists of varying lengths and sorts them using the implemented sorting algorithms. It times these sorting operations and stores the average time across multiple trials. It also creates plots of runtime vs n and outputs the slope of the log-log plots for several sorting algorithms.
+
+File: project1tests.py
+
+Description:
+This file contains the provided testing code for the sorting algorithms. It includes functions to test the sorting algorithms and measure their runtime.
+
+Functions:
+1. isSorted(unsortedList, sortedList): Helper function that checks if a given list has been properly sorted. It compares the sorted list with the original unsorted list and returns True if they are equal, and False otherwise.
+
+2. testingSuite(alg): Function that runs a number of tests using the

@@ -1,4 +1,3 @@
-
 import streamlit as st
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
@@ -167,12 +166,12 @@ def handle_user_input(user_question, user):
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
 
-st.set_page_config(page_title="Chat with Repo2", page_icon="i")
+st.set_page_config(page_title="Chat with Repo1", page_icon="i")
 
 user = st.selectbox('Select the user type',('Technical Users','Non-technical users'))
 
-if st.button("Chat with Repo 2"):
-    raw_text = get_content_from_files('summary/','summary2.txt')
+if st.button("Chat with Repo 1"):
+    raw_text = get_content_from_files('summary/','summary1.txt')
     text_chunks = get_text_chunks(raw_text)
     vectorstore = get_vectorstore(text_chunks)
     st.session_state.conversation = get_conversation_chain(vectorstore)

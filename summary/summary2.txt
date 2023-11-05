@@ -1,0 +1,39 @@
+Technical Documentation for Code Base:
+
+File: exerciser.h
+
+Description: This file contains the declaration of the exercise() function, which is used to perform queries on the database.
+
+Functions:
+- void exercise(connection * C): This function takes a pointer to a connection object as a parameter and performs queries on the database using the query functions defined in query_funcs.h.
+
+File: query_funcs.h
+
+Description: This file contains the declarations of various functions used to perform queries on the database.
+
+Functions:
+- void initalize_db(connection * C): This function takes a pointer to a connection object as a parameter and initializes the database by creating the necessary tables.
+- void add_player(connection * C, int team_id, int jersey_num, string first_name, string last_name, int mpg, int ppg, int rpg, int apg, double spg, double bpg): This function takes a pointer to a connection object and various parameters related to a player and adds a new player to the database.
+- void add_team(connection * C, string name, int state_id, int color_id, int wins, int losses): This function takes a pointer to a connection object and various parameters related to a team and adds a new team to the database.
+- void add_state(connection * C, string name): This function takes a pointer to a connection object and the name of a state and adds a new state to the database.
+- void add_color(connection * C, string name): This function takes a pointer to a connection object and the name of a color and adds a new color to the database.
+- void query1(connection * C, int use_mpg, int min_mpg, int max_mpg, int use_ppg, int min_ppg, int max_ppg, int use_rpg, int min_rpg, int max_rpg, int use_apg, int min_apg, int max_apg, int use_spg, double min_spg, double max_spg, int use_bpg, double min_bpg, double max_bpg): This function takes a pointer to a connection object and various parameters related to player attributes and performs a query to retrieve players based on the specified attributes.
+- void query2(connection * C, string team_color): This function takes a pointer to a connection object and the name of a team color and performs a query to retrieve teams with the specified color.
+- void query3(connection * C, string team_name): This function takes a pointer to a connection object and the name of a team and performs a query to retrieve players from the specified team, ordered by points per game.
+- void query4(connection * C, string team_state, string team_color): This function takes a pointer to a connection object and the name of a team state and color and performs a query to retrieve players from teams with the specified state and color.
+- void query5(connection * C, int num_wins): This function takes a pointer to a connection object and the number of wins and performs a query to retrieve players from teams with more than the specified number of wins.
+
+File: query_funcs.cpp
+
+Description: This file contains the definitions of the functions declared in query_funcs.h.
+
+File: main.cpp
+
+Description: This file contains the main function, which establishes a connection to the database, initializes the database, reads data from source text files, performs queries on the database, and closes the database connection.
+
+Functions:
+- void readState(connection * C): This function takes a pointer to a connection object and reads data from the "state.txt" file to add states to the database.
+- void readColor(connection * C): This function takes a pointer to a connection object and reads data from the "color.txt" file to add colors to the database.
+- void readTeam(connection * C): This function takes a pointer to a connection object and reads data from the "team.txt" file to add teams to the database.
+- void readPlayer(connection * C): This function takes a pointer to a connection object and reads data from the "player.txt" file to add players to the database.
+- int main(int argc, char * argv[]): This is the main function of the program. It establishes a connection to the database, initializes the database, reads data from source text files, performs queries on the database using the exercise() function, and closes the database connection.
