@@ -1,8 +1,8 @@
-# DukeGenAI-Team9: OnBoard Express
+# Code OnBoard Express
 
 ## Overview
 
-Welcome to **OnBoard Express** by **Gen AI Team 9** – a revolutionary tool designed to streamline the onboarding process in tech environments. Imagine a world where new employees don't have to spend weeks getting acquainted with your codebase or workflow. Picture a scenario where product managers receive instant briefings on major changes without waiting for developer input. Envision technical support resolving client issues swiftly without always relying on engineering feedback.
+Welcome to **Code OnBoard Express** a revolutionary tool designed to streamline the onboarding process in tech environments. Imagine a world where new employees don't have to spend weeks getting acquainted with your codebase or workflow. Picture a scenario where product managers receive instant briefings on major changes without waiting for developer input. Envision technical support resolving client issues swiftly without always relying on engineering feedback.
 
 OnBoard Express is here to turn these imaginations into reality.
 
